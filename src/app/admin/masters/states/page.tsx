@@ -6,6 +6,7 @@ import Button from "@/components/admin/Button";
 import ConfirmModal from "@/components/admin/ConfirmModal";
 import Input from "@/components/admin/Input";
 import Modal from "@/components/admin/Modal";
+import Pagination from "@/components/admin/Pagination";
 import Table from "@/components/admin/Table";
 import { Column } from "@/lib/types";
 import toast from "react-hot-toast";
@@ -25,7 +26,6 @@ interface Country {
   code: string;
 }
 
-// Static initial data
 const initialStates: State[] = [
   { id: 1, name: "Maharashtra", code: "MH", countryId: 1, countryName: "India", status: "Active" },
   { id: 2, name: "Delhi", code: "DL", countryId: 1, countryName: "India", status: "Active" },
@@ -69,7 +69,9 @@ export default function StatesPage() {
   const [pendingStatus, setPendingStatus] = useState("");
   const [form, setForm] = useState<Partial<State>>(emptyState);
 
-  // Simulate loading
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     setLoading(true);
     setTimeout(() => setLoading(false), 500);
@@ -124,11 +126,9 @@ export default function StatesPage() {
     };
 
     if (selected) {
-      // Update existing state
       setStates(states.map(state => state.id === selected.id ? newState : state));
       toast.success("State updated");
     } else {
-      // Add new state
       setStates([...states, newState]);
       toast.success("State created");
     }
@@ -218,6 +218,12 @@ export default function StatesPage() {
     },
   ];
 
+  const totalPages = Math.ceil(states.length / ITEMS_PER_PAGE);
+  const paginatedData = states.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   if (loading) return <div className="flex h-64 items-center justify-center text-sm text-gray-500">Loading states...</div>;
 
   return (
@@ -236,7 +242,14 @@ export default function StatesPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
-        <Table columns={columns} data={states} />
+        <Table columns={columns} data={paginatedData} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={states.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={selected ? "Edit State" : "Add State"} size="lg">

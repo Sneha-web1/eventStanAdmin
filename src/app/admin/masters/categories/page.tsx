@@ -5,6 +5,7 @@ import { Plus, Edit, Trash2, Tag, RefreshCw } from "lucide-react";
 import Table from "@/components/admin/Table";
 import Modal from "@/components/admin/Modal";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import Pagination from "@/components/admin/Pagination";
 import Button from "@/components/admin/Button";
 import Input from "@/components/admin/Input";
 import { Column } from "@/lib/types";
@@ -18,7 +19,6 @@ interface Category {
 }
 
 export default function CategoriesPage() {
-  // Categories state
   const [categories, setCategories] = useState<Category[]>([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCategoryDeleteOpen, setIsCategoryDeleteOpen] = useState(false);
@@ -30,7 +30,9 @@ export default function CategoriesPage() {
   const [loading, setLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Fetch categories from API
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const fetchCategories = async (showToast = false) => {
     setLoading(true);
     try {
@@ -49,7 +51,6 @@ export default function CategoriesPage() {
     }
   };
 
-  // Add category to API
   const addCategoryToAPI = async (category: Omit<Category, 'id'>) => {
     try {
       const data = await adminApi.categories.create(category);
@@ -60,7 +61,6 @@ export default function CategoriesPage() {
     }
   };
 
-  // Update category in API
   const updateCategoryInAPI = async (id: string, category: Partial<Category>) => {
     try {
       const data = await adminApi.categories.update(id, category);
@@ -71,7 +71,6 @@ export default function CategoriesPage() {
     }
   };
 
-  // Delete category from API
   const deleteCategoryFromAPI = async (id: string) => {
     try {
       await adminApi.categories.delete(id);
@@ -82,7 +81,6 @@ export default function CategoriesPage() {
     }
   };
 
-  // Load categories on component mount
   useEffect(() => {
     fetchCategories(false);
   }, []);
@@ -91,7 +89,6 @@ export default function CategoriesPage() {
     fetchCategories(true);
   };
 
-  // Category CRUD operations
   const openAddCategory = () => {
     setSelectedCategory(null);
     setCategoryForm({ name: "", slug: "" });
@@ -117,20 +114,17 @@ export default function CategoriesPage() {
       return;
     }
 
-    // Generate slug from name if not provided
     const slug = categoryForm.slug || categoryForm.name.toLowerCase().replace(/\s+/g, '-');
     
     setLoading(true);
     
     try {
       if (selectedCategory) {
-        // Update existing category
         await updateCategoryInAPI(selectedCategory.id, {
           name: categoryForm.name,
           slug: slug,
         });
         
-        // Update local state
         setCategories(categories.map(c => 
           c.id === selectedCategory.id 
             ? { ...c, name: categoryForm.name!, slug: slug }
@@ -139,7 +133,6 @@ export default function CategoriesPage() {
         
         toast.success("Category updated successfully!");
       } else {
-        // Add new category
         const newCategory = await addCategoryToAPI({
           name: categoryForm.name,
           slug: slug,
@@ -186,13 +179,17 @@ export default function CategoriesPage() {
     });
   };
 
-  // Prepare data with static Sr. No.
   const categoriesWithSrNo = categories.map((category, index) => ({
     ...category,
     sr_no: index + 1
   }));
 
-  // Category columns with static Sr. No.
+  const totalPages = Math.ceil(categoriesWithSrNo.length / ITEMS_PER_PAGE);
+  const paginatedData = categoriesWithSrNo.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   const categoryColumns: Column[] = [
     { 
       key: "sr_no", 
@@ -246,9 +243,7 @@ export default function CategoriesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">
-            Categories Management
-          </h1>
+          <h1 className="text-xl font-bold text-gray-900">Categories Management</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {categories.length} categories total
           </p>
@@ -280,12 +275,18 @@ export default function CategoriesPage() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <Table
             columns={categoryColumns}
-            data={categoriesWithSrNo}
+            data={paginatedData}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={categoriesWithSrNo.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={(page) => setCurrentPage(page)}
           />
         </div>
       )}
 
-      {/* Category Add/Edit Modal */}
       <Modal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
@@ -333,7 +334,6 @@ export default function CategoriesPage() {
         </form>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={isCategoryDeleteOpen}
         onClose={() => setIsCategoryDeleteOpen(false)}

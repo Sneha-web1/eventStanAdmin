@@ -7,6 +7,7 @@ import Modal from '@/components/admin/Modal';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 import Button from '@/components/admin/Button';
 import Input from '@/components/admin/Input';
+import Pagination from '@/components/admin/Pagination';
 import { adminApi } from '@/api/adminApi';
 import toast from 'react-hot-toast';
 
@@ -45,6 +46,9 @@ export default function VendorsPage() {
     capacityPerDay: 0,
     commissionPercent: 0
   });
+
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchVendors();
@@ -235,6 +239,12 @@ export default function VendorsPage() {
     setIsDeleteOpen(false);
   };
 
+  const totalPages = Math.ceil(vendors.length / ITEMS_PER_PAGE);
+  const paginatedData = vendors.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -259,7 +269,14 @@ export default function VendorsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <Table columns={columns} data={vendors} />
+        <Table columns={columns} data={paginatedData} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={vendors.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selected ? 'Edit Vendor' : 'Create Vendor'} size="lg">

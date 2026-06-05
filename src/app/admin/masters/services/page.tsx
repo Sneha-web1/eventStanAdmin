@@ -7,6 +7,7 @@ import Button from '@/components/admin/Button';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 import Input from '@/components/admin/Input';
 import Modal from '@/components/admin/Modal';
+import Pagination from '@/components/admin/Pagination';
 import Table from '@/components/admin/Table';
 import { Column } from '@/lib/types';
 import toast from 'react-hot-toast';
@@ -47,6 +48,9 @@ export default function ServicesPage() {
   const [form, setForm] = useState(emptyForm);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
 
   const load = async () => {
     const [svc, ven, cat] = await Promise.allSettled([
@@ -129,10 +133,25 @@ export default function ServicesPage() {
     await load();
   };
 
+  const totalPages = Math.ceil(services.length / ITEMS_PER_PAGE);
+  const paginatedData = services.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between"><div><h1 className="text-xl font-bold text-gray-900">Vendor Services</h1><p className="text-sm text-gray-500 mt-0.5">{services.length} vendor services</p></div><Button onClick={openAdd}><Plus size={15} />Add Service</Button></div>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm"><Table columns={columns} data={services} /></div>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <Table columns={columns} data={paginatedData} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={services.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+      </div>
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={selected ? 'Edit Vendor Service' : 'Add Vendor Service'} size="lg">
         <form onSubmit={save} className="space-y-4">
           <select value={form.vendorId} onChange={e => setForm({ ...form, vendorId: e.target.value })} className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50/50" required>
