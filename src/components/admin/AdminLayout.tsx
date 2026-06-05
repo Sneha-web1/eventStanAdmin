@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
       { href: '/admin/masters/event-slots', label: 'Event Slots' },
       { href: '/admin/masters/coupons', label: 'Coupons' },
       { href: '/admin/masters/countries', label: 'Countries' },
+      { href: '/admin/masters/states', label: 'States' },
       { href: '/admin/masters/categories', label: 'Categories' },
       { href: '/admin/masters/email-templates', label: 'Email Templates' },
     ],
