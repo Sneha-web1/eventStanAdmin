@@ -22,13 +22,18 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCategoryDeleteOpen, setIsCategoryDeleteOpen] = useState(false);
+  const [isHomepageConfirmOpen, setIsHomepageConfirmOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [pendingHomepageToggle, setPendingHomepageToggle] = useState<Category | null>(null);
   const [categoryForm, setCategoryForm] = useState<Partial<Category>>({
     name: "",
     slug: "",
   });
   const [loading, setLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Static state for homepage checkboxes (frontend only)
+  const [homepageCategories, setHomepageCategories] = useState<Set<string>>(new Set());
 
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -106,6 +111,42 @@ export default function CategoriesPage() {
     setIsCategoryDeleteOpen(true);
   };
 
+  // Show confirmation before toggling homepage
+  const handleHomepageToggleClick = (category: Category) => {
+    setPendingHomepageToggle(category);
+    setIsHomepageConfirmOpen(true);
+  };
+
+  // Actually toggle the homepage status after confirmation
+  const confirmHomepageToggle = () => {
+    if (pendingHomepageToggle) {
+      const categoryId = pendingHomepageToggle.id;
+      const categoryName = pendingHomepageToggle.name;
+      const isCurrentlySelected = homepageCategories.has(categoryId);
+      
+      setHomepageCategories(prev => {
+        const newSet = new Set(prev);
+        if (isCurrentlySelected) {
+          newSet.delete(categoryId);
+        } else {
+          newSet.add(categoryId);
+        }
+        return newSet;
+      });
+      
+      // Sirf ek baar toast message
+      if (isCurrentlySelected) {
+        toast.success(`${categoryName} removed from homepage`);
+      } else {
+        toast.success(`${categoryName} added to homepage`);
+      }
+      
+      // Clean up
+      setPendingHomepageToggle(null);
+      setIsHomepageConfirmOpen(false);
+    }
+  };
+
   const handleCategorySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -158,6 +199,12 @@ export default function CategoriesPage() {
     try {
       await deleteCategoryFromAPI(selectedCategory.id);
       setCategories(categories.filter(c => c.id !== selectedCategory.id));
+      // Remove from homepage set if deleted
+      setHomepageCategories(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedCategory.id);
+        return newSet;
+      });
       toast.success("Category deleted successfully!");
       setIsCategoryDeleteOpen(false);
     } catch (error) {
@@ -216,6 +263,26 @@ export default function CategoriesPage() {
       )
     },
     {
+      key: "homepage",
+      label: "Home Page",
+      render: (_: any, row: Category) => (
+        <div className="flex items-center gap-2">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={homepageCategories.has(row.id)}
+              onChange={() => handleHomepageToggleClick(row)}
+            />
+            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
+          </label>
+          <span className="text-xs text-gray-500">
+            {homepageCategories.has(row.id) ? 'Yes' : 'No'}
+          </span>
+        </div>
+      )
+    },
+    {
       key: "actions",
       label: "Actions",
       render: (_: any, row: Category) => (
@@ -245,7 +312,10 @@ export default function CategoriesPage() {
         <div>
           <h1 className="text-xl font-bold text-gray-900">Categories Management</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {categories.length} categories total
+            {categories.length} categories total • 
+            <span className="text-orange-600 ml-1">
+              {homepageCategories.size} on homepage
+            </span>
           </p>
         </div>
         <div className="flex gap-2">
@@ -340,6 +410,21 @@ export default function CategoriesPage() {
         onConfirm={handleDeleteCategory}
         title="Delete Category"
         message={`Are you sure you want to delete category "${selectedCategory?.name}"? This action cannot be undone.`}
+      />
+
+      <ConfirmModal
+        isOpen={isHomepageConfirmOpen}
+        onClose={() => {
+          setIsHomepageConfirmOpen(false);
+          setPendingHomepageToggle(null);
+        }}
+        onConfirm={confirmHomepageToggle}
+        title={pendingHomepageToggle && homepageCategories.has(pendingHomepageToggle.id) ? "Remove from Homepage" : "Add to Homepage"}
+        message={
+          pendingHomepageToggle && homepageCategories.has(pendingHomepageToggle.id)
+            ? `Are you sure you want to remove "${pendingHomepageToggle?.name}" from the homepage?`
+            : `Are you sure you want to add "${pendingHomepageToggle?.name}" to the homepage?`
+        }
       />
     </div>
   );

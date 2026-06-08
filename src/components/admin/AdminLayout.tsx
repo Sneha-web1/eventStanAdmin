@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
     icon: Grid3X3,
     children: [
       { href: '/admin/masters/services', label: 'Services' },
-      { href: '/admin/masters/subservices', label: 'Subservices' },
+      { href: '/admin/masters/pending-service-approvals', label: 'Pending Services' },
       { href: '/admin/masters/event-slots', label: 'Event Slots' },
       { href: '/admin/masters/coupons', label: 'Coupons' },
       { href: '/admin/masters/countries', label: 'Countries' },
@@ -37,9 +37,25 @@ const navItems: NavItem[] = [
   },
   { href: '/admin/role-permission', label: 'Role & Permission', icon: Shield },
   { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/vendors', label: 'Vendors', icon: Truck },
+  {
+    href: '#vendors',
+    label: 'Vendors',
+    icon: Truck,
+    children: [
+      { href: '/admin/vendors', label: 'Vendor List' },
+      { href: '/admin/lead-vendor', label: 'Lead Vendor' },
+    ],
+  },
   { href: '/admin/vendor-services', label: 'Vendor Services', icon: Package },
-  { href: '/admin/marketing-packages', label: 'Marketing Packages', icon: Tag },
+  {
+    href: '#packages',
+    label: 'Packages',
+    icon: Tag,
+    children: [
+      { href: '/admin/packages/all-packages', label: 'All Packages' },
+      { href: '/admin/packages/promotion-packages', label: 'Promotion Packages' },
+    ],
+  },
   { href: '/admin/booking-management', label: 'Booking Management', icon: BookOpen },
   { href: '/admin/feedback-testimonial', label: 'Feedback & Testimonial', icon: Star },
   { href: '/admin/system-notifications', label: 'System Notifications', icon: Bell },
@@ -54,6 +70,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loggingOut, setLoggingOut] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [mastersOpen, setMastersOpen] = useState(false);
+  const [vendorsOpen, setVendorsOpen] = useState(false);
+  const [packagesOpen, setPackagesOpen] = useState(false);
   const [admin, setAdmin] = useState<AdminUser | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -61,6 +79,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     setAdmin(getUser());
     if (pathname.startsWith('/admin/masters')) setMastersOpen(true);
+    if (pathname.startsWith('/admin/vendors') || pathname.startsWith('/admin/lead-vendor')) setVendorsOpen(true);
+    if (pathname.startsWith('/admin/packages')) setPackagesOpen(true);
   }, [pathname]);
 
   // Close dropdown when clicking outside
@@ -127,8 +147,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {navItems.map(({ href, label, icon: Icon, badge, children }) => {
               const active = pathname === href;
               const isMastersActive = pathname.startsWith('/admin/masters');
+              const isVendorsActive = pathname.startsWith('/admin/vendors') || pathname.startsWith('/admin/lead-vendor');
+              const isPackagesActive = pathname.startsWith('/admin/packages');
 
-              if (children) {
+              if (children && label === 'Masters') {
                 return (
                   <div key={href}>
                     <button
@@ -150,6 +172,96 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </button>
 
                     {mastersOpen && (
+                      <div className="ml-7 mt-0.5 space-y-0.5 border-l border-gray-100 pl-2.5">
+                        {children.map(child => {
+                          const isChildActive = pathname === child.href;
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => setMobileOpen(false)}
+                              className={`block px-2.5 py-1.5 text-xs rounded-md transition-all font-medium
+                                ${isChildActive
+                                  ? 'text-orange-600 bg-transparent font-semibold'
+                                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`}
+                            >
+                              {child.label}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              if (children && label === 'Vendors') {
+                return (
+                  <div key={href}>
+                    <button
+                      onClick={() => setVendorsOpen(o => !o)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                        ${isVendorsActive 
+                          ? 'text-orange-600 font-semibold' 
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                    >
+                      <Icon
+                        size={16}
+                        className={`shrink-0 ${isVendorsActive ? 'text-orange-500' : 'text-gray-400'}`}
+                      />
+                      <span className="flex-1 text-left truncate">{label}</span>
+                      <ChevronDown
+                        size={13}
+                        className={`shrink-0 transition-transform duration-200 ${vendorsOpen ? 'rotate-180' : ''} ${isVendorsActive ? 'text-orange-400' : 'text-gray-300'}`}
+                      />
+                    </button>
+
+                    {vendorsOpen && (
+                      <div className="ml-7 mt-0.5 space-y-0.5 border-l border-gray-100 pl-2.5">
+                        {children.map(child => {
+                          const isChildActive = pathname === child.href;
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => setMobileOpen(false)}
+                              className={`block px-2.5 py-1.5 text-xs rounded-md transition-all font-medium
+                                ${isChildActive
+                                  ? 'text-orange-600 bg-transparent font-semibold'
+                                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`}
+                            >
+                              {child.label}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              if (children && label === 'Packages') {
+                return (
+                  <div key={href}>
+                    <button
+                      onClick={() => setPackagesOpen(o => !o)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                        ${isPackagesActive 
+                          ? 'text-orange-600 font-semibold' 
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                    >
+                      <Icon
+                        size={16}
+                        className={`shrink-0 ${isPackagesActive ? 'text-orange-500' : 'text-gray-400'}`}
+                      />
+                      <span className="flex-1 text-left truncate">{label}</span>
+                      <ChevronDown
+                        size={13}
+                        className={`shrink-0 transition-transform duration-200 ${packagesOpen ? 'rotate-180' : ''} ${isPackagesActive ? 'text-orange-400' : 'text-gray-300'}`}
+                      />
+                    </button>
+
+                    {packagesOpen && (
                       <div className="ml-7 mt-0.5 space-y-0.5 border-l border-gray-100 pl-2.5">
                         {children.map(child => {
                           const isChildActive = pathname === child.href;
