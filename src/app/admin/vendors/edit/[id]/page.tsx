@@ -21,11 +21,23 @@ export default function EditVendorPage() {
     primaryEmail: 'john@testcompany.com',
     telephone: '042345678',
     primaryMobile: '501234567',
+    vendorType: 'permanent',
     password: 'Test@12345',
     specialization: 'Event Management',
     whereIsYourBusiness: 'Dubai, UAE',
     visaType: 'Employment Visa',
     address: 'Business Bay, Dubai, United Arab Emirates',
+    hourlyRate: '',
+    availableHoursPerWeek: '',
+    contractType: '',
+    salaryType: 'monthly',
+    basicSalary: '8000',
+    housingAllowance: '2000',
+    transportationAllowance: '1000',
+    otherAllowances: '500',
+    annualLeaves: '30',
+    workingHours: '48',
+    joiningDate: '2024-01-15',
     planDetail: 'Premium Plan - Annual Subscription',
     planExpiry: '2025-12-31',
     agreementFile: null as File | null,
@@ -59,7 +71,6 @@ export default function EditVendorPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 py-6">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
@@ -70,7 +81,6 @@ export default function EditVendorPage() {
             </div>
           </div>
           
-          {/* Status Toggle - Active/Inactive */}
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-gray-600">Status:</span>
             <button
@@ -94,7 +104,6 @@ export default function EditVendorPage() {
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
-            {/* Tell Us about yourself */}
             <div className={`bg-white rounded-xl shadow-sm transition-colors ${
               isActive ? 'border-2' : 'border border-gray-200'
             }`}>
@@ -140,7 +149,57 @@ export default function EditVendorPage() {
                     required 
                   />
                   
-                  {/* Password with hide/show */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Vendor Type *</label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer group">
+                        <div className="relative">
+                          <input
+                            type="radio"
+                            name="vendorType"
+                            value="freelancer"
+                            checked={form.vendorType === 'freelancer'}
+                            onChange={(e) => setForm({...form, vendorType: e.target.value})}
+                            className="peer sr-only"
+                          />
+                          <div className={`w-4 h-4 rounded-full border-2 transition-all ${
+                            form.vendorType === 'freelancer' 
+                              ? 'border-orange-500 bg-orange-500' 
+                              : 'border-gray-400 bg-white group-hover:border-orange-300'
+                          }`}>
+                            {form.vendorType === 'freelancer' && (
+                              <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-gray-700">Freelancer</span>
+                      </label>
+                      
+                      <label className="flex items-center gap-2 cursor-pointer group">
+                        <div className="relative">
+                          <input
+                            type="radio"
+                            name="vendorType"
+                            value="permanent"
+                            checked={form.vendorType === 'permanent'}
+                            onChange={(e) => setForm({...form, vendorType: e.target.value})}
+                            className="peer sr-only"
+                          />
+                          <div className={`w-4 h-4 rounded-full border-2 transition-all ${
+                            form.vendorType === 'permanent' 
+                              ? 'border-orange-500 bg-orange-500' 
+                              : 'border-gray-400 bg-white group-hover:border-orange-300'
+                          }`}>
+                            {form.vendorType === 'permanent' && (
+                              <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-gray-700">Permanent</span>
+                      </label>
+                    </div>
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
                     <div className="relative">
@@ -180,7 +239,6 @@ export default function EditVendorPage() {
                     onChange={(e) => setForm({...form, visaType: e.target.value})} 
                   />
                   
-                  {/* Address Textarea */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
                     <textarea
@@ -195,7 +253,183 @@ export default function EditVendorPage() {
               </div>
             </div>
 
-            {/* Professional Plan */}
+            {form.vendorType === 'freelancer' && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  Freelancer Details
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Contract Type *</label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="contractType"
+                          value="hourly"
+                          checked={form.contractType === 'hourly'}
+                          onChange={(e) => setForm({...form, contractType: e.target.value})}
+                          className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className="text-gray-700">Hourly</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="contractType"
+                          value="monthly"
+                          checked={form.contractType === 'monthly'}
+                          onChange={(e) => setForm({...form, contractType: e.target.value})}
+                          className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className="text-gray-700">Monthly</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="contractType"
+                          value="project"
+                          checked={form.contractType === 'project'}
+                          onChange={(e) => setForm({...form, contractType: e.target.value})}
+                          className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className="text-gray-700">Per Project</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <Input 
+                    label={`Hourly Rate (AED) ${form.contractType === 'hourly' ? '*' : ''}`} 
+                    type="number"
+                    value={form.hourlyRate} 
+                    onChange={(e) => setForm({...form, hourlyRate: e.target.value})}
+                    required={form.contractType === 'hourly'}
+                  />
+                  
+                  <Input 
+                    label="Available Hours per Week *" 
+                    type="number"
+                    value={form.availableHoursPerWeek} 
+                    onChange={(e) => setForm({...form, availableHoursPerWeek: e.target.value})}
+                    required
+                    placeholder="e.g., 40"
+                  />
+                  
+                  {form.contractType === 'monthly' && (
+                    <Input 
+                      label="Monthly Rate (AED) *" 
+                      type="number"
+                      value={form.hourlyRate} 
+                      onChange={(e) => setForm({...form, hourlyRate: e.target.value})}
+                      required
+                    />
+                  )}
+                  
+                  {form.contractType === 'project' && (
+                    <Input 
+                      label="Project Rate (AED) *" 
+                      type="number"
+                      value={form.hourlyRate} 
+                      onChange={(e) => setForm({...form, hourlyRate: e.target.value})}
+                      required
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {form.vendorType === 'permanent' && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  Permanent Employee Details
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Salary Type *</label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="salaryType"
+                          value="monthly"
+                          checked={form.salaryType === 'monthly'}
+                          onChange={(e) => setForm({...form, salaryType: e.target.value})}
+                          className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className="text-gray-700">Monthly</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="salaryType"
+                          value="yearly"
+                          checked={form.salaryType === 'yearly'}
+                          onChange={(e) => setForm({...form, salaryType: e.target.value})}
+                          className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className="text-gray-700">Yearly</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <Input 
+                    label={`Basic Salary (AED) *`} 
+                    type="number"
+                    value={form.basicSalary} 
+                    onChange={(e) => setForm({...form, basicSalary: e.target.value})}
+                    required
+                  />
+                  
+                  <Input 
+                    label="Housing Allowance (AED)" 
+                    type="number"
+                    value={form.housingAllowance} 
+                    onChange={(e) => setForm({...form, housingAllowance: e.target.value})}
+                  />
+                  
+                  <Input 
+                    label="Transportation Allowance (AED)" 
+                    type="number"
+                    value={form.transportationAllowance} 
+                    onChange={(e) => setForm({...form, transportationAllowance: e.target.value})}
+                  />
+                  
+                  <Input 
+                    label="Other Allowances (AED)" 
+                    type="number"
+                    value={form.otherAllowances} 
+                    onChange={(e) => setForm({...form, otherAllowances: e.target.value})}
+                  />
+                  
+                  <Input 
+                    label="Annual Leaves (days) *" 
+                    type="number"
+                    value={form.annualLeaves} 
+                    onChange={(e) => setForm({...form, annualLeaves: e.target.value})}
+                    required
+                    placeholder="e.g., 30"
+                  />
+                  
+                  <Input 
+                    label="Working Hours per Week *" 
+                    type="number"
+                    value={form.workingHours} 
+                    onChange={(e) => setForm({...form, workingHours: e.target.value})}
+                    required
+                    placeholder="e.g., 48"
+                  />
+                  
+                  <Input 
+                    label="Joining Date *" 
+                    type="date"
+                    value={form.joiningDate} 
+                    onChange={(e) => setForm({...form, joiningDate: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
             <div className={`bg-white rounded-xl shadow-sm transition-colors ${
               isActive ? 'border-2 ' : 'border border-gray-200'
             }`}>
@@ -228,7 +462,6 @@ export default function EditVendorPage() {
               </div>
             </div>
 
-            {/* Payment Bank Details */}
             <div className={`bg-white rounded-xl shadow-sm transition-colors ${
               isActive ? 'border-2' : 'border border-gray-200'
             }`}>
@@ -263,7 +496,6 @@ export default function EditVendorPage() {
                     onChange={(e) => setForm({...form, swift: e.target.value})} 
                   />
                   
-                  {/* Branch Address Textarea */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Branch Address</label>
                     <textarea
@@ -277,7 +509,6 @@ export default function EditVendorPage() {
               </div>
             </div>
 
-            {/* Buttons */}
             <div className="flex justify-end gap-3">
               <Button type="button" variant="secondary" onClick={() => router.back()}>Cancel</Button>
               <Button type="submit" disabled={loading}>{loading ? 'Updating...' : 'Update Vendor'}</Button>
